@@ -73,5 +73,5 @@ rmf_fleet:
   profile: # Robot profile is modelled as a circle
     radius: 10
   publish_fleet_state: True
-  fleet_state_topic: "fleet_state"
+  fleet_state_topic: "fleet_states"
   fleet_state_publish_frequency: 1
