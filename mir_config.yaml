@@ -22,7 +22,7 @@ robots:
     rmf_config:
       robot_state_update_frequency: 1
       start:
-        map_name: "test_map"
+        map_name: "L1"
 
         # NOTE(CH3):
         # If you leave these empty, the robot will try to figure it out on init
@@ -32,7 +32,6 @@ robots:
         # ON the waypoint!
         waypoint_index: 1 # Optional
         orientation: 0.1 # Optional, radians
-
 
 # NODE CONFIG ==================================================================
 # To init the ROS2 node names used in the script

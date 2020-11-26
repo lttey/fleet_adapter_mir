@@ -17,8 +17,6 @@ import argparse
 import nudged
 import yaml
 
-# Adding debugging
-import pdb
 import sys
 
 
@@ -285,6 +283,16 @@ def main(args, delivery_condition=None, mock=False):
                 fleet_state.name = fleet_name
 
                 for robot in robots.values():
+                    robot_state = robot.robot_state
+
+                    # Add code to pull robot level from waypoint information
+                    robot_waypoint_idx = robot.rmf_current_waypoint_index
+                    if robot_waypoint_idx is not None:
+                        robot_waypoint = robot.rmf_graph.get_waypoint(robot_waypoint_idx)
+                        # Assuming map_name == level_name ( following full-control example )
+                        robot_waypoint_level_name = robot_waypoint.map_name
+                        robot.robot_state.location.level_name = robot_waypoint_level_name
+
                     fleet_state.robots.append(robot.robot_state)
 
                 fleet_state_pub.publish(fleet_state)
