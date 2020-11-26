@@ -30,8 +30,8 @@ robots:
         #
         # Otherwise, fill BOTH of these! And make sure that the robot starts
         # ON the waypoint!
-        waypoint_index: # Optional
-        orientation: # Optional, radians
+        waypoint_index: 1 # Optional
+        orientation: 0.1 # Optional, radians
 
 
 # NODE CONFIG ==================================================================

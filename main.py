@@ -17,6 +17,10 @@ import argparse
 import nudged
 import yaml
 
+# Adding debugging
+import pdb
+import sys
+
 
 ###############################################################################
 # HELPER FUNCTIONS AND CLASSES
@@ -96,6 +100,7 @@ def create_fleet(config, mock):
     fleet_name = config['rmf_fleet']['name']
     fleet = adapter.add_fleet(fleet_name, robot_traits, nav_graph)
 
+
     if delivery_condition is None:
         # Naively accept all delivery requests
         fleet.accept_delivery_requests(lambda x: True)
@@ -106,6 +111,7 @@ def create_fleet(config, mock):
 
 
 def create_robot_command_handles(config, handle_data, dry_run=False):
+
     robots = {}
 
     for robot_name, robot_config in config['robots'].items():
@@ -152,10 +158,13 @@ def create_robot_command_handles(config, handle_data, dry_run=False):
         # If the plan start is configured, use it, otherwise, grab it
         if (start_config.get('waypoint_index')
                 and start_config.get('orientation')):
+            # TEMP logging to determine code path
+            print("waypoint_index and orientation were provided")
             starts = [plan.Start(handle_data['adapter'].now(),
                                  start_config.get('waypoint_index'),
                                  start_config.get('orientation'))]
         else:
+            print("waypoint_index and orientation were not provided")
             starts = plan.compute_plan_starts(
                 handle_data['graph'],
                 start_config['map_name'],
@@ -169,14 +178,20 @@ def create_robot_command_handles(config, handle_data, dry_run=False):
         # Insert start data into robot
         start = starts[0]
 
-        if start.lane.has_value:  # If the robot is in a lane
+        # If the robot is in a lane
+        if start.lane is not None and start.lane.has_value:  
             robot.rmf_current_lane_index = start.lane.value
             robot.rmf_current_waypoint_index = None
             robot.rmf_target_waypoint_index = None
-        else:  # Otherwise, the robot is on a waypoint
+
+        # Otherwise, the robot is on a waypoint
+        elif start.waypoint is not None:
             robot.rmf_current_lane_index = None
             robot.rmf_current_waypoint_index = start.waypoint
             robot.rmf_target_waypoint_index = None
+        else:
+            print("Both lanes and waypoints are None, which should not happen")
+            sys.exit()
 
         print("MAP_NAME:", start_config['map_name'])
         robot.rmf_map_name = start_config['map_name']
@@ -224,9 +239,11 @@ def main(args, delivery_condition=None, mock=False):
     rclpy.init()
     adpt.init_rclcpp()
 
+
     # INIT FLEET ==============================================================
     adapter, fleet, fleet_name, profile, nav_graph = create_fleet(config,
                                                                   mock=mock)
+
 
     # INIT TRANSFORMS =========================================================
     rmf_coordinates = config['reference_coordinates']['rmf']
@@ -277,7 +294,7 @@ def main(args, delivery_condition=None, mock=False):
             config['rmf_fleet']['fleet_state_publish_frequency'],
             create_fleet_state_pub_fn(fleet_state_pub, fleet_name, robots)
         )
-
+   
     # GO! =====================================================================
     adapter.start()
     rclpy_executor.spin()
